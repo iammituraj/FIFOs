@@ -1,8 +1,8 @@
 /*=================================================================================================================================================================================
    Design       : Dual-port RAM
 
-   Description  : Fully synthesisable and configurable RAM-based FIFO.
-                  - Data array infers Dual-port Block RAM on FPGA synthesisers.
+   Description  : Fully synthesisable and configurable RAM based FIFO.
+                  - Infers Dual-port Block RAM on FPGA synthesisers.
                   - Configurable Data width.
                   - Configurable Depth.
                   
@@ -50,7 +50,7 @@ logic                         wren_s          ;        // Write Enable signal ge
 logic                         rden_s          ;        // Read Enable signal generated iff FIFO is not empty
 logic                         full_s          ;        // Full signal
 logic                         empty_s         ;        // Empty signal
-logic                         empty_rg        ;        // Empty signal (registered)
+
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
    Instantiation of RAM
@@ -83,8 +83,7 @@ always @ (posedge clk) begin
       wrptr_rg  <= 0              ;
       rdptr_rg  <= 0              ;      
       dcount_rg <= 0              ;
-      empty_rg  <= 1'b0           ;
-
+      
    end
 
    else if (i_fifoen) begin
@@ -121,11 +120,8 @@ always @ (posedge clk) begin
       end                    
       else if (!wren_s && rden_s) begin          // Read operation
          dcount_rg <= dcount_rg - 1 ;         
-      end
+      end      
       
-      // Empty signal registered
-      empty_rg <= empty_s ;
-
    end
 
 end
@@ -145,7 +141,7 @@ assign rden_s      = i_rden & !empty_s               ;
 
 // Full and Empty to output
 assign o_full      = full_s                          ;
-assign o_empty     = empty_rg                        ;
+assign o_empty     = empty_s                         ;
  
 
 endmodule
