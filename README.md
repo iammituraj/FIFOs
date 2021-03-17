@@ -5,7 +5,9 @@ Source codes included
 ---------------------
 -- Register-based FIFO
 
--- RAM-based FIFO
+-- Block RAM-based FIFO
+
+-- Distributed RAM-based FIFO
 
 Comments
 --------
