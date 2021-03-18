@@ -2,7 +2,7 @@
    Design       : Dual-port RAM
 
    Description  : Fully synthesisable and configurable Dual-port RAM. One write port & read port.
-                  - Infers Distributed RAM on FPGA Synthesisers.
+                  - Infers Dual port Distributed RAM on FPGA Synthesisers.
                   - Configurable Data width.
                   - Configurable Depth.
                   
