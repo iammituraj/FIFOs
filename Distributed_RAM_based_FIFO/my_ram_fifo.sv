@@ -1,8 +1,8 @@
 /*=================================================================================================================================================================================
-   Design       : Dual-port RAM
+   Design       : Dual-port Distributed RAM-based FIFO
 
    Description  : Fully synthesisable and configurable RAM based FIFO.
-                  - Infers Dual-port Block RAM on FPGA synthesisers.
+                  - Infers Dual-port Distributed RAM on FPGA synthesisers.
                   - Configurable Data width.
                   - Configurable Depth.
                   
