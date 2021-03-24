@@ -5,6 +5,7 @@
                   - Infers Dual-port Distributed RAM on FPGA synthesisers.
                   - Configurable Data width.
                   - Configurable Depth.
+                  - Full and Empty signals have one-cycle latency.
                   
    Developer    : Mitu Raj, MR-Creations, iammituraj@gmail.com
    Date         : Feb-17-2021
