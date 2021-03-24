@@ -7,7 +7,7 @@
                   - Configurable Depth.
                   
    Developer    : Mitu Raj, MR-Creations, iammituraj@gmail.com
-   Date         : Feb-17-2021
+   Date         : Feb-01-2021
 =================================================================================================================================================================================*/
 /*=================================================================================================================================================================================
                                                                         D U A L   P O R T   R A M
@@ -24,10 +24,7 @@ module my_ram   #(
 
                  (
                     /* Global */                  
-                    input  logic                  clk                 ,        // Clock
-
-                    /* Control */
-                    input  logic                  i_ramen             ,        // RAM enable 
+                    input  logic                  clk                 ,        // Clock                    
                                        
                     /* Write Port*/
                     input  logic                  i_wren              ,        // Write Enable
@@ -52,13 +49,9 @@ logic [DATA_W - 1 : 0] data_rg [DEPTH] ;        // Data array
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 always @ (posedge clk) begin
               
-   if (i_ramen) begin
-
-      if (i_wren) begin                          
+   if (i_wren) begin                          
          
-         data_rg [i_waddr] <= i_wdata  ;      
-
-      end
+      data_rg [i_waddr] <= i_wdata  ;      
 
    end
 
@@ -70,12 +63,8 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 always @ (posedge clk) begin
    
-   if (i_ramen) begin 
-
-      o_rdata <= data_rg [i_raddr] ;
+   o_rdata <= data_rg [i_raddr] ;
       
-   end
-
 end
 
 
