@@ -5,6 +5,7 @@
                   - Data array infers Dual-port Block RAM on FPGA synthesisers.
                   - Configurable Data width.
                   - Configurable Depth.
+                  - Empty signal de-assertion has two-cycle latency. Full and Empty signal assertion has one-cycle latency.
                   
    Developer    : Mitu Raj, MR-Creations, iammituraj@gmail.com
    Date         : Feb-17-2021
@@ -15,62 +16,59 @@
 =================================================================================================================================================================================*/
 
 module my_ram_fifo #(
-                       parameter DATA_W           = 8      ,        // Data width
-                       parameter DEPTH            = 8               // Depth
+                       parameter DATA_W           = 8           ,        // Data width
+                       parameter DEPTH            = 8                    // Depth
                     )
 
                     (
                        /* Global */                    	
-                       input                   clk         ,        // Clock
-                       input                   rstn        ,        // Active-low Synchronous Reset
-                       
-                       /* Control */                       
-                       input                   i_fifoen    ,        // FIFO enable
+                       input                   clk              ,        // Clock
+                       input                   rstn             ,        // Active-low Synchronous Reset                      
 
                        /* Enqueue side */                       
-                       input                   i_wren      ,        // Write Enable
-                       input  [DATA_W - 1 : 0] i_wrdata    ,        // Write-data                    
-                       output                  o_full      ,        // Full signal
+                       input                   i_wren           ,        // Write Enable
+                       input  [DATA_W - 1 : 0] i_wrdata         ,        // Write-data                    
+                       output                  o_full           ,        // Full signal
                        
                        /* Dequeue side */   
-                       input                   i_rden      ,        // Read Enable
-                       output [DATA_W - 1 : 0] o_rddata    ,        // Read-data                    
-                       output                  o_empty              // Empty signal
+                       input                   i_rden           ,        // Read Enable
+                       output [DATA_W - 1 : 0] o_rddata         ,        // Read-data                    
+                       output                  o_empty                   // Empty signal
                     );
 
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
    Internal Registers/Signals
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-logic [$clog2(DEPTH) - 1 : 0] wrptr_rg        ;        // Write pointer
-logic [$clog2(DEPTH) - 1 : 0] rdptr_rg        ;        // Read pointer
-logic [$clog2(DEPTH)     : 0] dcount_rg       ;        // Data counter
+logic [$clog2 (DEPTH) - 1 : 0] wrptr_rg        ;        // Write pointer
+logic [$clog2 (DEPTH) - 1 : 0] rdptr_rg        ;        // Read pointer
+logic [$clog2 (DEPTH) - 1 : 0] nxt_rdptr       ;        // Next Read pointer
+logic [$clog2 (DEPTH) - 1 : 0] rdaddr          ;        // Read-address to RAM
+logic [$clog2 (DEPTH)     : 0] dcount_rg       ;        // Data counter
       
-logic                         wren_s          ;        // Write Enable signal generated iff FIFO is not full
-logic                         rden_s          ;        // Read Enable signal generated iff FIFO is not empty
-logic                         full_s          ;        // Full signal
-logic                         empty_s         ;        // Empty signal
-logic                         empty_rg        ;        // Empty signal (registered)
-
+logic                          wren_s          ;        // Write Enable signal generated iff FIFO is not full
+logic                          rden_s          ;        // Read Enable signal generated iff FIFO is not empty
+logic                          full_s          ;        // Full signal
+logic                          empty_s         ;        // Empty signal
+logic                          empty_rg        ;        // Empty signal (registered)
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
    Instantiation of RAM
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 my_ram #(
-           .DATA_W  ( DATA_W )    ,
-           .DEPTH   ( DEPTH  )
+           .DATA_W       ( DATA_W )        ,
+           .DEPTH        ( DEPTH  )
         )
 
 my_ram  (
-           .clk      ( clk      ) ,
-           
-           .i_ramen  ( i_fifoen ) ,
-           .i_wren   ( wren_s   ) ,
-           .i_waddr  ( wrptr_rg ) ,
-           .i_wdata  ( i_wrdata ) ,
+           .clk          ( clk           ) ,          
 
-           .i_raddr  ( rdptr_rg ) ,
-           .o_rdata  ( o_rddata )
+           .i_wren       ( wren_s        ) ,
+           .i_waddr      ( wrptr_rg      ) ,
+           .i_wdata      ( i_wrdata      ) ,
+
+           .i_raddr      ( rdaddr        ) ,
+           .o_rdata      ( o_rddata      )
         ) ;
 
 
@@ -88,7 +86,7 @@ always @ (posedge clk) begin
 
    end
 
-   else if (i_fifoen) begin
+   else begin
       
       /* FIFO write logic */            
       if (wren_s) begin         
@@ -125,7 +123,7 @@ always @ (posedge clk) begin
       end
       
       // Empty signal registered
-      empty_rg <= empty_s ;
+      empty_rg <= empty_s ;      
 
    end
 
@@ -137,16 +135,20 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 // Full and Empty internal
-assign full_s      = (dcount_rg == DEPTH) ? 1'b1 : 0 ;
-assign empty_s     = (dcount_rg == 0    ) ? 1'b1 : 0 ;
+assign full_s      = (dcount_rg == DEPTH) ? 1'b1 : 0             ;
+assign empty_s     = (dcount_rg == 0    ) ? 1'b1 : 0             ;
 
 // Write and Read Enables internal
-assign wren_s      = i_wren & !full_s                ;  
-assign rden_s      = i_rden & !empty_s               ;
+assign wren_s      = i_wren & !full_s                            ;  
+assign rden_s      = i_rden & !empty_s && !empty_rg              ;
 
 // Full and Empty to output
-assign o_full      = full_s                          ;
-assign o_empty     = empty_rg                        ;
+assign o_full      = full_s                                      ;
+assign o_empty     = empty_s || empty_rg                         ;
+
+// Read-address to RAM
+assign nxt_rdptr   = (rdptr_rg == DEPTH - 1) ? '0 : rdptr_rg + 1 ;
+assign rdaddr      = rden_s ? nxt_rdptr : rdptr_rg               ;
  
 
 endmodule
