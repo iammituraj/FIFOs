@@ -1,5 +1,5 @@
 # FIFOs
-Register-based and RAM-based FIFOs, LIFOs/Stacks designed in Verilog/System Verilog.
+Register-based and RAM-based FIFOs designed in Verilog/System Verilog.
 
 Source codes included
 ---------------------
