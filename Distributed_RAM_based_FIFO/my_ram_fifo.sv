@@ -7,7 +7,7 @@
                   - Configurable Depth.
                   - Full and Empty signals have one-cycle latency.
                   
-   Developer    : Mitu Raj, MR-Creations, iammituraj@gmail.com
+   Developer    : Mitu Raj, iammituraj@gmail.com
    Date         : Feb-17-2021
 =================================================================================================================================================================================*/
 
