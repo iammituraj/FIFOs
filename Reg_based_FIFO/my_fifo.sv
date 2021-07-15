@@ -7,7 +7,7 @@
                   - Configurable Almost-full and Almost-empty signals.
                   - All status signals have single cycle latency.
                   
-   Developer    : Mitu Raj, MR-Creations, iammituraj@gmail.com
+   Developer    : Mitu Raj, iammituraj@gmail.com
    Date         : Feb-12-2021
 ===============================================================================================================================*/
 
