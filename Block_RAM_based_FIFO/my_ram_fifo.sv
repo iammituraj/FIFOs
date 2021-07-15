@@ -7,7 +7,7 @@
                   - Configurable Depth.
                   - Empty signal de-assertion has two-cycle latency. Full and Empty signal assertion has one-cycle latency.
                   
-   Developer    : Mitu Raj, MR-Creations, iammituraj@gmail.com
+   Developer    : Mitu Raj, iammituraj@gmail.com
    Date         : Feb-17-2021
 =================================================================================================================================================================================*/
 
