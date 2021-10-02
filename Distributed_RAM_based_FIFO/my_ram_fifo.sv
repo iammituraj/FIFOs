@@ -149,7 +149,7 @@ assign wren_s      = i_wren & !full_s                ;
 assign rden_s      = i_rden & !empty_s               ;
 
 // Full and Empty to output
-assign o_full      = full_s                          ;
+assign o_full      = full_s  || !ready_rg            ;
 assign o_empty     = empty_s                         ;
  
 
