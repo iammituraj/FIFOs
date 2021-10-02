@@ -5,7 +5,7 @@
                   - Configurable Data width.
                   - Configurable Depth.
                   - Configurable Almost-full and Almost-empty signals.
-                  - All status signals have single cycle latency.
+                  - All status signals have zero cycle latency.
                   
    Developer    : Mitu Raj, iammituraj@gmail.com
    Date         : Feb-12-2021
