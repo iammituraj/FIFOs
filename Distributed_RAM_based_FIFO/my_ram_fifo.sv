@@ -43,6 +43,7 @@ module my_ram_fifo #(
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
    Internal Registers/Signals
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+logic                         ready_rg        ;        // Ready signal to indicate that FIFO is out of reset
 logic [$clog2(DEPTH) - 1 : 0] wrptr_rg        ;        // Write pointer
 logic [$clog2(DEPTH) - 1 : 0] rdptr_rg        ;        // Read pointer
 logic [$clog2(DEPTH)     : 0] dcount_rg       ;        // Data counter
@@ -81,48 +82,55 @@ always @ (posedge clk) begin
 
    if (!rstn) begin      
      
+      ready_rg  <= 1'b0           ;
       wrptr_rg  <= 0              ;
       rdptr_rg  <= 0              ;      
       dcount_rg <= 0              ;
       
    end
 
-   else if (i_fifoen) begin
+   else begin
       
-      /* FIFO write logic */            
-      if (wren_s) begin         
+      ready_rg <= 1'b1 ;
+      
+      if (i_fifoen) begin
+      
+         /* FIFO write logic */            
+         if (wren_s) begin         
          
-         if (wrptr_rg == DEPTH - 1) begin
-            wrptr_rg <= 0               ;        // Reset write pointer  
+            if (wrptr_rg == DEPTH - 1) begin
+               wrptr_rg <= 0               ;        // Reset write pointer  
+            end
+
+            else begin
+               wrptr_rg <= wrptr_rg + 1    ;        // Increment write pointer            
+            end
+
          end
 
-         else begin
-            wrptr_rg <= wrptr_rg + 1    ;        // Increment write pointer            
+         /* FIFO read logic */
+         if (rden_s) begin         
+
+            if (rdptr_rg == DEPTH - 1) begin
+               rdptr_rg <= 0               ;        // Reset read pointer
+            end
+
+            else begin
+               rdptr_rg <= rdptr_rg + 1    ;        // Increment read pointer            
+            end
+
          end
 
+         /* FIFO data counter update logic */
+         if (wren_s && !rden_s) begin               // Write operation
+            dcount_rg <= dcount_rg + 1 ;
+         end                    
+         else if (!wren_s && rden_s) begin          // Read operation
+            dcount_rg <= dcount_rg - 1 ;         
+         end   
+         
       end
-
-      /* FIFO read logic */
-      if (rden_s) begin         
-
-         if (rdptr_rg == DEPTH - 1) begin
-            rdptr_rg <= 0               ;        // Reset read pointer
-         end
-
-         else begin
-            rdptr_rg <= rdptr_rg + 1    ;        // Increment read pointer            
-         end
-
-      end
-
-      /* FIFO data counter update logic */
-      if (wren_s && !rden_s) begin               // Write operation
-         dcount_rg <= dcount_rg + 1 ;
-      end                    
-      else if (!wren_s && rden_s) begin          // Read operation
-         dcount_rg <= dcount_rg - 1 ;         
-      end      
-      
+   
    end
 
 end
