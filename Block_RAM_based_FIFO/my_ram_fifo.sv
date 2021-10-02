@@ -5,7 +5,7 @@
                   - Data array infers Dual-port Block RAM on FPGA synthesisers.
                   - Configurable Data width.
                   - Configurable Depth.
-                  - Empty signal de-assertion has two-cycle latency. Full and Empty signal assertion has one-cycle latency.
+                  - Empty signal de-assertion has one cycle latency. Full and Empty signal assertion has zero cycle latency.
                   
    Developer    : Mitu Raj, iammituraj@gmail.com
    Date         : Feb-17-2021
