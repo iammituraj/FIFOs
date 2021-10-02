@@ -37,8 +37,8 @@ module my_fifo #(
 /*-------------------------------------------------------------------------------------------------------------------------------
    Internal Registers/Signals
 -------------------------------------------------------------------------------------------------------------------------------*/
+logic                         ready_rg        ;        // Ready signal to indicate that FIFO is out of reset
 logic [DATA_W - 1        : 0] data_rg [DEPTH] ;        // Data array
-
 logic [$clog2(DEPTH) - 1 : 0] wrptr_rg        ;        // Write pointer
 logic [$clog2(DEPTH) - 1 : 0] rdptr_rg        ;        // Read pointer
 logic [$clog2(DEPTH)     : 0] dcount_rg       ;        // Data counter
@@ -56,6 +56,7 @@ always @ (posedge clk) begin
 
    if (!rstn) begin
       
+      ready_rg  <= 1'b0           ;
       data_rg   <= '{default: '0} ;
       wrptr_rg  <= 0              ;
       rdptr_rg  <= 0              ;      
@@ -65,9 +66,11 @@ always @ (posedge clk) begin
 
    else begin
       
+      ready_rg <= 1'b1 ;
+      
       /* FIFO write logic */            
       if (wren_s) begin                          
-         
+                  
          data_rg [wrptr_rg] <= i_wrdata ;        // Data written to FIFO
 
          if (wrptr_rg == DEPTH - 1) begin
@@ -111,23 +114,23 @@ end
 -------------------------------------------------------------------------------------------------------------------------------*/
 
 // Full and Empty internal
-assign full_s      = (dcount_rg == DEPTH) ? 1'b1 : 0 ;
-assign empty_s     = (dcount_rg == 0    ) ? 1'b1 : 0 ;
+assign full_s      = (dcount_rg == DEPTH) ? 1'b1 : 0                ; 
+assign empty_s     = (dcount_rg == 0    ) ? 1'b1 : 0                ;
 
 // Write and Read Enables internal
-assign wren_s      = i_wren & !full_s                ;  
-assign rden_s      = i_rden & !empty_s               ;
+assign wren_s      = i_wren & !full_s                               ;  
+assign rden_s      = i_rden & !empty_s                              ;
 
 // Full and Empty to output
-assign o_full      = full_s                          ;
-assign o_empty     = empty_s                         ;
+assign o_full      = full_s  || !ready_rg                           ;
+assign o_empty     = empty_s                                        ;
 
 // Almost-full and Almost Empty to output
-assign o_alm_full  = (dcount_rg > UPP_TH) ? 1'b1 : 0 ;
-assign o_alm_empty = (dcount_rg < LOW_TH) ? 1'b1 : 0 ;
+assign o_alm_full  = ((dcount_rg > UPP_TH) ? 1'b1 : 0) || !ready_rg ;
+assign o_alm_empty = (dcount_rg < LOW_TH) ? 1'b1 : 0                ;  
 
 // Read-data to output
-assign o_rddata    = data_rg [rdptr_rg]              ;   
+assign o_rddata    = data_rg [rdptr_rg]                             ;   
 
 
 endmodule
