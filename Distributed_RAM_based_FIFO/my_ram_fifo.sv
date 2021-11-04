@@ -7,7 +7,7 @@
                   - Configurable Depth.
                   - Full and Empty signals have zero cycle latency.
                   
-   Developer    : Mitu Raj, iammituraj@gmail.com
+   Developer    : Mitu Raj, chip@chipmunklogic.com at Chipmunk Logic ™, https://chipmunklogic.com
    Date         : Feb-17-2021
 =================================================================================================================================================================================*/
 

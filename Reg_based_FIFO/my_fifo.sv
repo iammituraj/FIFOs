@@ -7,7 +7,7 @@
                   - Configurable Almost-full and Almost-empty signals.
                   - All status signals have zero cycle latency.
                   
-   Developer    : Mitu Raj, iammituraj@gmail.com
+   Developer    : Mitu Raj, chip@chipmunklogic.com at Chipmunk Logic ™, https://chipmunklogic.com
    Date         : Feb-12-2021
 ===============================================================================================================================*/
 

@@ -7,7 +7,7 @@
                   - Configurable Depth.
                   - Empty signal de-assertion has one cycle latency. Full and Empty signal assertion has zero cycle latency.
                   
-   Developer    : Mitu Raj, iammituraj@gmail.com
+   Developer    : Mitu Raj, chip@chipmunklogic.com at Chipmunk Logic ™, https://chipmunklogic.com
    Date         : Feb-17-2021
 =================================================================================================================================================================================*/
 
