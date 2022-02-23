@@ -147,7 +147,7 @@ assign wren_s      = i_wren & !full_s                            ;
 assign rden_s      = i_rden & !empty_s && !empty_rg              ;
 
 // Full and Empty to output
-assign o_full      = full_s  || !ready rg                        ;
+assign o_full      = full_s  || !ready_rg                        ;
 assign o_empty     = empty_s || empty_rg                         ;
 
 // Read-address to RAM
