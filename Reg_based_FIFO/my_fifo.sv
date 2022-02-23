@@ -125,7 +125,7 @@ assign rden_s      = i_rden & !empty_s                              ;
 assign o_full      = full_s  || !ready_rg                           ;
 assign o_empty     = empty_s                                        ;
 
-// Almost-full and Almost Empty to output
+// Almost-full and Almost-empty to output
 assign o_alm_full  = ((dcount_rg > UPP_TH) ? 1'b1 : 0) || !ready_rg ;
 assign o_alm_empty = (dcount_rg < LOW_TH) ? 1'b1 : 0                ;  
 
