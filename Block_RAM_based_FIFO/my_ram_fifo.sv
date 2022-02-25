@@ -40,7 +40,6 @@ module my_ram_fifo #(
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
    Internal Registers/Signals
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-logic                          ready_rg        ;        // Ready signal to indicate FIFO is out of reset
 logic [$clog2 (DEPTH) - 1 : 0] wrptr_rg        ;        // Write pointer
 logic [$clog2 (DEPTH) - 1 : 0] rdptr_rg        ;        // Read pointer
 logic [$clog2 (DEPTH) - 1 : 0] nxt_rdptr       ;        // Next Read pointer
@@ -79,8 +78,7 @@ my_ram  (
 always @ (posedge clk) begin
 
    if (!rstn) begin      
-      
-      ready_rg  <= 1'b0           ;      
+           
       wrptr_rg  <= 0              ;
       rdptr_rg  <= 0              ;      
       dcount_rg <= 0              ;
@@ -88,9 +86,8 @@ always @ (posedge clk) begin
 
    end
 
-   else begin
+   else begin   
       
-      ready_rg <= 1'b1 ;
       
       /* FIFO write logic */            
       if (wren_s) begin         
@@ -147,7 +144,7 @@ assign wren_s      = i_wren & !full_s                            ;
 assign rden_s      = i_rden & !empty_s && !empty_rg              ;
 
 // Full and Empty to output
-assign o_full      = full_s  || !ready_rg                        ;
+assign o_full      = full_s                                      ;
 assign o_empty     = empty_s || empty_rg                         ;
 
 // Read-address to RAM
