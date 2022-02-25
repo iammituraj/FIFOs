@@ -37,7 +37,6 @@ module my_fifo #(
 /*-------------------------------------------------------------------------------------------------------------------------------
    Internal Registers/Signals
 -------------------------------------------------------------------------------------------------------------------------------*/
-logic                         ready_rg        ;        // Ready signal to indicate that FIFO is out of reset
 logic [DATA_W - 1        : 0] data_rg [DEPTH] ;        // Data array
 logic [$clog2(DEPTH) - 1 : 0] wrptr_rg        ;        // Write pointer
 logic [$clog2(DEPTH) - 1 : 0] rdptr_rg        ;        // Read pointer
@@ -54,9 +53,8 @@ logic                         empty_s         ;        // Empty signal
 -------------------------------------------------------------------------------------------------------------------------------*/
 always @ (posedge clk) begin
 
-   if (!rstn) begin
+   if (!rstn) begin      
       
-      ready_rg  <= 1'b0           ;
       data_rg   <= '{default: '0} ;
       wrptr_rg  <= 0              ;
       rdptr_rg  <= 0              ;      
@@ -64,10 +62,8 @@ always @ (posedge clk) begin
 
    end
 
-   else begin
-      
-      ready_rg <= 1'b1 ;
-      
+   else begin   
+            
       /* FIFO write logic */            
       if (wren_s) begin                          
                   
@@ -126,7 +122,7 @@ assign o_full      = full_s  || !ready_rg                           ;
 assign o_empty     = empty_s                                        ;
 
 // Almost-full and Almost-empty to output
-assign o_alm_full  = ((dcount_rg > UPP_TH) ? 1'b1 : 0) || !ready_rg ;
+assign o_alm_full  = ((dcount_rg > UPP_TH) ? 1'b1 : 0)              ;
 assign o_alm_empty = (dcount_rg < LOW_TH) ? 1'b1 : 0                ;  
 
 // Read-data to output
