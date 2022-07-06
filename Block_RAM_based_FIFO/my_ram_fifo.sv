@@ -44,7 +44,7 @@ logic  [$clog2 (DEPTH) - 1 : 0] wrptr_rg        ;        // Write pointer
 logic  [$clog2 (DEPTH) - 1 : 0] rdptr_rg        ;        // Read pointer
 logic  [$clog2 (DEPTH) - 1 : 0] nxt_rdptr       ;        // Next Read pointer
 logic  [$clog2 (DEPTH) - 1 : 0] rdaddr          ;        // Read-address to RAM
-logic  
+ 
 logic                           wren            ;        // Write Enable signal generated iff FIFO is not full
 logic                           rden            ;        // Read Enable signal generated iff FIFO is not empty
 logic                           full            ;        // Full signal
