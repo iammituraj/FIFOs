@@ -37,60 +37,69 @@ module my_ram_fifo #(
                     );
 
 
-/*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   Internal Registers/Signals
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-logic [$clog2 (DEPTH) - 1 : 0] wrptr_rg        ;        // Write pointer
-logic [$clog2 (DEPTH) - 1 : 0] rdptr_rg        ;        // Read pointer
-logic [$clog2 (DEPTH) - 1 : 0] nxt_rdptr       ;        // Next Read pointer
-logic [$clog2 (DEPTH) - 1 : 0] rdaddr          ;        // Read-address to RAM
-logic [$clog2 (DEPTH)     : 0] dcount_rg       ;        // Data counter
+/*-------------------------------------------------------------------------------------------------------------------------------
+   Internal Registers / Signals
+-------------------------------------------------------------------------------------------------------------------------------*/
+reg   [$clog2 (DEPTH) - 1 : 0] wrptr_rg        ;        // Write pointer
+reg   [$clog2 (DEPTH) - 1 : 0] rdptr_rg        ;        // Read pointer
+wire  [$clog2 (DEPTH) - 1 : 0] nxt_rdptr       ;        // Next Read pointer
+wire  [$clog2 (DEPTH) - 1 : 0] rdaddr          ;        // Read-address to RAM
       
-logic                          wren_s          ;        // Write Enable signal generated iff FIFO is not full
-logic                          rden_s          ;        // Read Enable signal generated iff FIFO is not empty
-logic                          full_s          ;        // Full signal
-logic                          empty_s         ;        // Empty signal
-logic                          empty_rg        ;        // Empty signal (registered)
+wire                           wren            ;        // Write Enable signal generated iff FIFO is not full
+wire                           rden            ;        // Read Enable signal generated iff FIFO is not empty
+wire                           full            ;        // Full signal
+wire                           empty           ;        // Empty signal
+reg                            empty_rg        ;        // Empty signal (registered)
+reg                            state_rg        ;        // State
+reg                            ex_rg           ;        // Exception
 
-/*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/*-------------------------------------------------------------------------------------------------------------------------------
    Instantiation of RAM
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-my_ram #(
-           .DATA_W       ( DATA_W )        ,
-           .DEPTH        ( DEPTH  )
-        )
+-------------------------------------------------------------------------------------------------------------------------------*/
+ram #(
 
-my_ram  (
-           .clk          ( clk           ) ,          
+   .DATA_W       ( DATA_W )        ,
+   .DEPTH        ( DEPTH  )
 
-           .i_wren       ( wren_s        ) ,
-           .i_waddr      ( wrptr_rg      ) ,
-           .i_wdata      ( i_wrdata      ) ,
+)
 
-           .i_raddr      ( rdaddr        ) ,
-           .o_rdata      ( o_rddata      )
-        ) ;
+ram  (
+
+   .clk          ( clk           ) ,          
+
+   .i_wren       ( wren          ) ,
+   .i_waddr      ( wrptr_rg      ) ,
+   .i_wdata      ( i_wrdata      ) ,
+
+   .i_raddr      ( rdaddr        ) ,
+   .o_rdata      ( o_rddata      )
+
+) ;
 
 
-/*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/*-------------------------------------------------------------------------------------------------------------------------------
    Synchronous logic to write to and read from FIFO
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+-------------------------------------------------------------------------------------------------------------------------------*/
 always @ (posedge clk) begin
-
+   
+   // Reset
    if (!rstn) begin      
-           
-      wrptr_rg  <= 0              ;
-      rdptr_rg  <= 0              ;      
-      dcount_rg <= 0              ;
-      empty_rg  <= 1'b0           ;
+      
+      // Internal Registers           
+      wrptr_rg  <= 0    ;
+      rdptr_rg  <= 0    ; 
+      state_rg  <= 1'b0 ;
+      ex_rg     <= 1'b0 ;
 
    end
-
+   
+   // Out of reset
    else begin   
       
       
       /* FIFO write logic */            
-      if (wren_s) begin         
+      if (wren) begin         
          
          if (wrptr_rg == DEPTH - 1) begin
             wrptr_rg <= 0               ;        // Reset write pointer  
@@ -103,7 +112,7 @@ always @ (posedge clk) begin
       end
 
       /* FIFO read logic */
-      if (rden_s) begin         
+      if (rden) begin         
 
          if (rdptr_rg == DEPTH - 1) begin
             rdptr_rg <= 0               ;        // Reset read pointer
@@ -114,42 +123,55 @@ always @ (posedge clk) begin
          end
 
       end
+      
+      // State where FIFO is emptied
+      if (state_rg == 1'b0) begin
 
-      /* FIFO data counter update logic */
-      if (wren_s && !rden_s) begin               // Write operation
-         dcount_rg <= dcount_rg + 1 ;
-      end                    
-      else if (!wren_s && rden_s) begin          // Read operation
-         dcount_rg <= dcount_rg - 1 ;         
+         ex_rg <= 1'b0 ;
+
+         if (wren && !rden) begin
+            state_rg <= 1'b1 ;                        
+         end 
+         else if (wren && rden && (rdaddr == wrptr_rg)) begin
+            ex_rg    <= 1'b1 ;        // Exceptional case where same address is being read and written in FIFO ram
+         end
+
       end
       
+      // State where FIFO is filled up
+      else begin
+         if (!wren && rden) begin
+            state_rg <= 1'b0 ;            
+         end
+      end
+
       // Empty signal registered
-      empty_rg <= empty_s ;      
+      empty_rg <= empty ;      
 
    end
 
 end
 
 
-/*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/*-------------------------------------------------------------------------------------------------------------------------------
    Continuous Assignments
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+-------------------------------------------------------------------------------------------------------------------------------*/
 
 // Full and Empty internal
-assign full_s      = (dcount_rg == DEPTH) ? 1'b1 : 0             ;
-assign empty_s     = (dcount_rg == 0    ) ? 1'b1 : 0             ;
+assign full      = (wrptr_rg == rdptr_rg) && (state_rg == 1'b1)            ;
+assign empty     = ((wrptr_rg == rdptr_rg) && (state_rg == 1'b0)) || ex_rg ;
 
 // Write and Read Enables internal
-assign wren_s      = i_wren & !full_s                            ;  
-assign rden_s      = i_rden & !empty_s && !empty_rg              ;
+assign wren      = i_wren & !full                                          ;  
+assign rden      = i_rden & !empty & !empty_rg                             ;
 
 // Full and Empty to output
-assign o_full      = full_s                                      ;
-assign o_empty     = empty_s || empty_rg                         ;
+assign o_full      = full                                                  ;
+assign o_empty     = empty || empty_rg                                     ;
 
 // Read-address to RAM
-assign nxt_rdptr   = (rdptr_rg == DEPTH - 1) ? '0 : rdptr_rg + 1 ;
-assign rdaddr      = rden_s ? nxt_rdptr : rdptr_rg               ;
+assign nxt_rdptr   = (rdptr_rg == DEPTH - 1) ? 'b0 : rdptr_rg + 1          ;
+assign rdaddr      = rden ? nxt_rdptr : rdptr_rg                           ;
  
 
 endmodule
