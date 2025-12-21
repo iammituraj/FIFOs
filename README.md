@@ -5,18 +5,18 @@ includes generic FIFO implementations and FPGA-friendly implementations targetti
 Source codes included
 ---------------------
 1. Generic
-- fifo    - suitable for any depth
-- fifo_2n - optimized for 2^N depth
+- [fifo](Generic)    - suitable for any depth
+- [fifo_2n](Generic) - optimized for 2^N depth
 
 
 2. BlockRAM_based
-- fifo_bram    - suitable for any depth
-- fifo_2n_lram - optimized for 2^N depth
+- [fifo_bram](BlockRAM_based)    - suitable for any depth
+- [fifo_2n_lram](BlockRAM_based) - optimized for 2^N depth
 
 
 3. LUTRAM_based
-- fifo_lram    - suitable for any depth
-- fifo_2n_lram - optimized for 2^N depth
+- [fifo_lram](LUTRAM_based)    - suitable for any depth
+- [fifo_2n_lram](LUTRAM_based) - optimized for 2^N depth
 
 License
 -------
